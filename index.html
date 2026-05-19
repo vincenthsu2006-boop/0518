@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食享 · FoodShare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FAFAF8;
+    --bg2: #F3F1ED;
+    --white: #FFFFFF;
+    --accent: #C17B5A;
+    --accent-dark: #A5613E;
+    --accent-light: #F0E0D6;
+    --text: #1A1A1A;
+    --text2: #666;
+    --text3: #999;
+    --border: #EEEDE9;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+    --r: 12px;
+    --r-sm: 8px;
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── VIEWS ── */
+  .view { display: none; min-height: 100vh; animation: fadeIn 0.35s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(250,250,248,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    cursor: pointer;
+  }
+  .nav-logo span { color: var(--text); font-weight: 400; font-style: italic; }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+  .nav-btn {
+    padding: 8px 16px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+  .nav-btn-ghost { background: transparent; color: var(--text2); }
+  .nav-btn-ghost:hover { background: var(--bg2); color: var(--text); }
+  .nav-btn-accent { background: var(--accent); color: #fff; }
+  .nav-btn-accent:hover { background: var(--accent-dark); transform: scale(1.02); }
+  .nav-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--border); }
+  .nav-name { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+  .nav-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  /* ── AUTH VIEW ── */
+  #view-auth {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  #view-auth.active { display: flex; }
+  .auth-deco {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.06;
+    background: var(--accent);
+    pointer-events: none;
+  }
+  .auth-deco-1 { width: 500px; height: 500px; top: -150px; right: -100px; }
+  .auth-deco-2 { width: 300px; height: 300px; bottom: -100px; left: -80px; }
+
+  .auth-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 440px;
+    padding: 40px 40px 36px;
+    position: relative;
+    z-index: 1;
+    margin: 24px;
+  }
+  .auth-header { text-align: center; margin-bottom: 32px; }
+  .auth-logo {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .auth-logo span { color: var(--text); font-weight: 400; font-style: italic; }
+  .auth-tagline { font-size: 0.85rem; color: var(--text3); }
+
+  .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+  .auth-tab {
+    flex: 1; padding: 10px; text-align: center;
+    font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; color: var(--text2);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+    font-family: var(--font-body);
+  }
+  .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .auth-form { display: none; flex-direction: column; gap: 16px; }
+  .auth-form.active { display: flex; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text2); letter-spacing: 0.03em; text-transform: uppercase; }
+  .form-input {
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+  .form-input::placeholder { color: var(--text3); }
+
+  .avatar-upload-label {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .avatar-upload-label:hover { border-color: var(--accent); background: var(--accent-light); }
+  .avatar-preview { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; overflow: hidden; }
+  .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-upload-text { font-size: 0.875rem; color: var(--text2); }
+  .avatar-upload-text strong { color: var(--accent); display: block; }
+  #avatar-input, #compose-img-input { display: none; }
+
+  .form-error { font-size: 0.8rem; color: #E05555; margin-top: 2px; display: none; }
+  .form-error.show { display: block; }
+
+  .btn-primary {
+    padding: 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-sm);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+  .btn-primary:hover { background: var(--accent-dark); transform: scale(1.02); box-shadow: 0 4px 16px rgba(193,123,90,0.3); }
+
+  .auth-guest-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--text3);
+  }
+  .auth-guest-link a { color: var(--accent); cursor: pointer; text-decoration: none; font-weight: 500; }
+  .auth-guest-link a:hover { text-decoration: underline; }
+
+  /* ── HOME VIEW ── */
+  .home-hero {
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--white) 60%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .home-hero-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--white); box-shadow: 0 4px 16px rgba(193,123,90,0.2); margin: 0 auto 16px; display: block; }
+  .home-hero-avatar-placeholder { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 16px; border: 3px solid var(--white); box-shadow: 0 4px 16px rgba(193,123,90,0.2); }
+  .home-hero h1 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; margin-bottom: 6px; }
+  .home-hero h1 span { color: var(--accent); font-style: italic; }
+  .home-hero p { color: var(--text2); font-size: 0.9rem; margin-bottom: 24px; }
+  .btn-compose {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-compose:hover { background: var(--accent-dark); transform: scale(1.02); box-shadow: 0 4px 20px rgba(193,123,90,0.35); }
+
+  .home-posts { max-width: 680px; margin: 0 auto; padding: 32px 16px; }
+  .section-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; color: var(--text); }
+
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--text3); }
+  .empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.9rem; }
+
+  /* ── POST CARD ── */
+  .post-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+    animation: cardIn 0.4s ease both;
+  }
+  .post-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+  .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .post-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0; }
+  .post-avatar-placeholder { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .post-meta { flex: 1; min-width: 0; }
+  .post-author-name { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+  .post-author-id { font-size: 0.8rem; color: var(--text3); }
+  .post-time { font-size: 0.78rem; color: var(--text3); white-space: nowrap; }
+
+  .post-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+  .post-content { font-size: 0.9rem; color: var(--text2); line-height: 1.7; margin-bottom: 12px; white-space: pre-wrap; word-break: break-word; }
+  .post-image { width: 100%; border-radius: 8px; margin-bottom: 14px; display: block; max-height: 400px; object-fit: cover; }
+
+  .post-actions { display: flex; gap: 4px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .action-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 20px;
+    font-family: var(--font-body); font-size: 0.85rem; font-weight: 500;
+    cursor: pointer; border: none; background: transparent; color: var(--text2);
+    transition: all 0.18s;
+  }
+  .action-btn:hover { background: var(--bg2); color: var(--text); }
+  .action-btn.liked { color: var(--accent); }
+  .action-btn.liked .like-icon { transform: scale(1.2); }
+
+  /* ── COMMENTS ── */
+  .comments-section { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; display: none; }
+  .comments-section.open { display: block; }
+
+  .comment-item { display: flex; gap: 10px; margin-bottom: 14px; animation: cardIn 0.25s ease; }
+  .comment-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--border); flex-shrink: 0; }
+  .comment-avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+  .comment-bubble { background: var(--bg); border-radius: 0 10px 10px 10px; padding: 10px 12px; flex: 1; }
+  .comment-name { font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .comment-text { font-size: 0.85rem; color: var(--text2); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+  .comment-time { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+
+  .comment-input-row { display: flex; gap: 10px; align-items: flex-end; margin-top: 8px; }
+  .comment-input {
+    flex: 1; padding: 10px 12px;
+    border: 1.5px solid var(--border); border-radius: 20px;
+    font-family: var(--font-body); font-size: 0.875rem;
+    background: var(--white); color: var(--text);
+    outline: none; resize: none; transition: border-color 0.2s;
+    min-height: 40px; max-height: 100px;
+  }
+  .comment-input:focus { border-color: var(--accent); }
+  .comment-input:disabled { background: var(--bg2); cursor: not-allowed; }
+  .comment-submit {
+    padding: 9px 18px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 20px;
+    font-family: var(--font-body); font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: background 0.2s, transform 0.2s;
+    white-space: nowrap;
+  }
+  .comment-submit:hover { background: var(--accent-dark); transform: scale(1.03); }
+  .guest-comment-hint { font-size: 0.8rem; color: var(--text3); padding: 8px 0; }
+  .guest-comment-hint a { color: var(--accent); cursor: pointer; font-weight: 500; }
+
+  /* ── COMPOSE VIEW ── */
+  #view-compose { background: var(--bg); }
+  .compose-container { max-width: 680px; margin: 0 auto; padding: 32px 16px; }
+  .compose-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text2); font-size: 0.875rem; font-weight: 500;
+    cursor: pointer; margin-bottom: 24px;
+    background: none; border: none; font-family: var(--font-body);
+    transition: color 0.2s;
+  }
+  .compose-back:hover { color: var(--accent); }
+  .compose-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+  }
+  .compose-author { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .compose-avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border); }
+  .compose-avatar-placeholder { width: 52px; height: 52px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+  .compose-author-info strong { font-weight: 600; font-size: 0.95rem; }
+  .compose-author-info span { font-size: 0.8rem; color: var(--text3); display: block; }
+
+  .compose-form { display: flex; flex-direction: column; gap: 18px; }
+  .compose-title-input {
+    padding: 0;
+    border: none; border-bottom: 1.5px solid var(--border);
+    border-radius: 0;
+    font-family: var(--font-display); font-size: 1.4rem; font-weight: 600;
+    color: var(--text); background: transparent; outline: none;
+    padding-bottom: 12px; transition: border-color 0.2s;
+  }
+  .compose-title-input:focus { border-bottom-color: var(--accent); }
+  .compose-title-input::placeholder { color: var(--text3); }
+  .compose-content-input {
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    padding: 14px; font-family: var(--font-body);
+    font-size: 0.95rem; color: var(--text); background: var(--white);
+    outline: none; resize: vertical; min-height: 140px; line-height: 1.7;
+    transition: border-color 0.2s;
+  }
+  .compose-content-input:focus { border-color: var(--accent); }
+  .compose-content-input::placeholder { color: var(--text3); }
+
+  .img-upload-area {
+    border: 1.5px dashed var(--border); border-radius: var(--r-sm);
+    padding: 20px; text-align: center;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .img-upload-area:hover { border-color: var(--accent); background: var(--accent-light); }
+  .img-upload-area .img-icon { font-size: 2rem; margin-bottom: 6px; }
+  .img-upload-area p { font-size: 0.85rem; color: var(--text2); }
+  .img-upload-area strong { color: var(--accent); }
+
+  #compose-img-preview { display: none; position: relative; }
+  #compose-img-preview img { width: 100%; border-radius: 8px; }
+  .img-remove-btn {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); color: #fff;
+    border: none; cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .img-remove-btn:hover { background: rgba(0,0,0,0.8); }
+
+  .compose-actions { display: flex; justify-content: flex-end; gap: 12px; }
+  .btn-secondary {
+    padding: 12px 24px;
+    background: transparent; color: var(--text2);
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+  /* ── FEED VIEW ── */
+  .feed-container { max-width: 680px; margin: 0 auto; padding: 32px 16px; }
+  .feed-header { margin-bottom: 24px; }
+  .feed-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; }
+  .feed-subtitle { color: var(--text3); font-size: 0.875rem; margin-top: 4px; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(26,26,26,0.5);
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 36px 32px;
+    max-width: 360px; width: calc(100% - 48px);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .modal-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .modal h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+  .modal p { font-size: 0.875rem; color: var(--text2); margin-bottom: 24px; }
+  .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+  .modal-btn {
+    padding: 12px; border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.2s;
+  }
+  .modal-btn-primary { background: var(--accent); color: #fff; }
+  .modal-btn-primary:hover { background: var(--accent-dark); }
+  .modal-btn-secondary { background: var(--bg2); color: var(--text); }
+  .modal-btn-secondary:hover { background: var(--border); }
+  .modal-btn-ghost { background: transparent; color: var(--text3); font-size: 0.85rem; }
+  .modal-btn-ghost:hover { color: var(--text); }
+
+  /* ── TOAST ── */
+  #toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast {
+    background: var(--text); color: #fff;
+    padding: 12px 20px; border-radius: 20px;
+    font-size: 0.875rem; font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s both;
+    white-space: nowrap;
+  }
+  .toast.success { background: #3A7D44; }
+  .toast.error { background: #C0392B; }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(8px); } }
+
+  /* ── STAGGER ── */
+  .post-card:nth-child(1) { animation-delay: 0ms; }
+  .post-card:nth-child(2) { animation-delay: 80ms; }
+  .post-card:nth-child(3) { animation-delay: 160ms; }
+  .post-card:nth-child(4) { animation-delay: 240ms; }
+  .post-card:nth-child(5) { animation-delay: 320ms; }
+  .post-card:nth-child(n+6) { animation-delay: 400ms; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    nav { padding: 0 16px; }
+    .nav-name { display: none; }
+    .auth-card { padding: 28px 24px; }
+    .compose-card { padding: 20px; }
+    .home-hero { padding: 36px 16px 28px; }
+    .compose-title-input { font-size: 1.2rem; }
+    .feed-container, .home-posts { padding: 20px 12px; }
+    .modal { padding: 28px 20px; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── PROFILE VIEW ── */
+  #view-profile { background: var(--bg); }
+  .profile-hero {
+    background: linear-gradient(160deg, var(--accent-light) 0%, var(--white) 65%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 24px 36px;
+    text-align: center;
+  }
+  .profile-avatar-wrap {
+    width: 90px; height: 90px; border-radius: 50%;
+    margin: 0 auto 16px;
+    border: 4px solid var(--white);
+    box-shadow: 0 4px 20px rgba(193,123,90,0.2);
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+    background: var(--accent-light); font-size: 2.4rem;
+  }
+  .profile-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-name {
+    font-family: var(--font-display); font-size: 1.7rem; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .profile-id { font-size: 0.88rem; color: var(--text3); margin-bottom: 16px; }
+  .profile-bio {
+    display: inline-block; max-width: 480px; width: 100%;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 12px 20px;
+    font-size: 0.9rem; color: var(--text2); line-height: 1.6;
+    box-shadow: var(--shadow);
+  }
+  .profile-bio-empty { font-style: italic; color: var(--text3); }
+  .profile-stats {
+    display: flex; justify-content: center; gap: 32px;
+    margin-top: 20px;
+  }
+  .profile-stat { text-align: center; }
+  .profile-stat-num { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  .profile-stat-label { font-size: 0.78rem; color: var(--text3); margin-top: 2px; }
+
+  .profile-posts { max-width: 680px; margin: 0 auto; padding: 32px 16px; }
+  .profile-section-title {
+    font-family: var(--font-display); font-size: 1.1rem; font-weight: 600;
+    margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* Clickable author in post card */
+  .post-author-link {
+    display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;
+    cursor: pointer; border-radius: 8px; padding: 2px 4px;
+    transition: background 0.15s;
+  }
+  .post-author-link:hover { background: var(--bg2); }
+
+  /* Bio input in settings */
+  .bio-textarea {
+    width: 100%; padding: 10px 14px; margin-top: 10px;
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 0.9rem; color: var(--text);
+    background: var(--white); resize: vertical; min-height: 72px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .bio-textarea:focus { border-color: var(--accent); }
+  .btn-save-bio {
+    margin-top: 8px; padding: 9px 20px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 0.875rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-save-bio:hover { background: var(--accent-dark); }
+
+  /* ── AVATAR UPLOAD (settings) ── */
+  .avatar-upload-wrap {
+    position: relative; width: 72px; height: 72px;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .avatar-upload-wrap img,
+  .avatar-upload-placeholder {
+    width: 72px; height: 72px; border-radius: 50%;
+    object-fit: cover; display: block;
+    border: 3px solid var(--border);
+    transition: filter 0.2s;
+  }
+  .avatar-upload-placeholder {
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; border: 3px solid var(--border);
+  }
+  .avatar-upload-overlay {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(0,0,0,0.42);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.2s;
+    font-size: 1.3rem;
+  }
+  .avatar-upload-wrap:hover .avatar-upload-overlay { opacity: 1; }
+  .avatar-upload-wrap:hover img,
+  .avatar-upload-wrap:hover .avatar-upload-placeholder { filter: brightness(0.75); }
+  .avatar-upload-hint {
+    font-size: 0.75rem; color: var(--text3);
+    margin-top: 6px; text-align: center; width: 72px;
+  }
+
+
+  /* ── 2FA IMAGE CAPTCHA VIEW ── */
+  #view-2fa {
+    display: none; align-items: flex-start; justify-content: center;
+    min-height: 100vh; background: var(--bg);
+    position: relative; overflow-y: auto;
+    padding: 32px 16px;
+  }
+  #view-2fa.active { display: flex; }
+  .twofa-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 20px; box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 460px; padding: 32px 28px 28px;
+    position: relative; z-index: 1;
+    animation: slideUp 0.3s ease;
+  }
+  .twofa-icon { font-size: 2.2rem; text-align: center; margin-bottom: 8px; }
+  .twofa-title {
+    font-family: var(--font-display); font-size: 1.35rem;
+    font-weight: 700; text-align: center; margin-bottom: 6px;
+  }
+  .twofa-sub { font-size: 0.82rem; color: var(--text3); text-align: center; margin-bottom: 20px; line-height: 1.5; }
+
+  /* Image CAPTCHA grid */
+  .captcha-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 20px;
+  }
+  .captcha-tile {
+    position: relative; border-radius: 12px; overflow: hidden;
+    cursor: pointer; aspect-ratio: 1;
+    border: 3px solid transparent;
+    transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    background: var(--bg2);
+  }
+  .captcha-tile:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+  .captcha-tile img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; border-radius: 9px;
+    pointer-events: none; user-select: none;
+  }
+  .captcha-tile.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-light), 0 4px 16px rgba(193,123,90,0.25);
+  }
+  .captcha-check {
+    position: absolute; top: 6px; right: 6px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: none; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    animation: popIn 0.2s ease;
+  }
+  .captcha-tile.selected .captcha-check { display: flex; }
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)}
+    60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
+  }
+  .captcha-grid.shake { animation: shake 0.4s ease; }
+
+  .twofa-error { font-size: 0.82rem; color: #E05555; text-align: center; margin-bottom: 12px; display: none; }
+  .twofa-error.show { display: block; }
+  .captcha-hint { font-size: 0.78rem; color: var(--text3); text-align: center; margin-bottom: 16px; }
+  .captcha-actions { display: flex; gap: 12px; }
+  .captcha-actions .btn-primary { flex: 2; padding: 13px; }
+  .captcha-refresh {
+    flex: 1; padding: 13px;
+    background: var(--bg2); color: var(--text2);
+    border: 1.5px solid var(--border); border-radius: var(--r-sm);
+    font-family: var(--font-body); font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .captcha-refresh:hover { border-color: var(--accent); color: var(--accent); }
+  .twofa-back {
+    display: block; text-align: center; margin-top: 14px;
+    font-size: 0.82rem; color: var(--text3); cursor: pointer;
+    background: none; border: none; font-family: var(--font-body);
+    transition: color 0.2s;
+  }
+  .twofa-back:hover { color: var(--accent); }
+
+  /* ── SETTINGS VIEW ── */
+  #view-settings { background: var(--bg); }
+  .settings-container { max-width: 600px; margin: 0 auto; padding: 32px 16px; }
+  .settings-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text2); font-size: 0.875rem; font-weight: 500;
+    cursor: pointer; margin-bottom: 28px;
+    background: none; border: none; font-family: var(--font-body);
+    transition: color 0.2s;
+  }
+  .settings-back:hover { color: var(--accent); }
+  .settings-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; margin-bottom: 24px; }
+  .settings-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 24px 28px; margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .settings-section-label {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text3); margin-bottom: 16px;
+  }
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--border);
+  }
+  .settings-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .settings-row-info { flex: 1; }
+  .settings-row-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
+  .settings-row-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.5; }
+  .two-fa-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em;
+  }
+  .two-fa-badge.on { background: #d4edda; color: #276337; }
+  .two-fa-badge.off { background: var(--bg2); color: var(--text3); }
+
+  /* Toggle switch */
+  .toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0; background: var(--border);
+    border-radius: 26px; cursor: pointer; transition: background 0.25s;
+  }
+  .toggle-slider::before {
+    content: ''; position: absolute; width: 20px; height: 20px;
+    left: 3px; top: 3px; background: #fff; border-radius: 50%;
+    transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+  .toggle-switch input:checked + .toggle-slider::before { transform: translateX(22px); }
+
+  .phone-input-row { display: flex; gap: 10px; margin-top: 16px; align-items: flex-end; }
+  .phone-input-row .form-input { flex: 1; }
+  .btn-save-phone {
+    padding: 12px 20px; background: var(--accent); color: #fff;
+    border: none; border-radius: var(--r-sm); font-family: var(--font-body);
+    font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-save-phone:hover { background: var(--accent-dark); }
+
+  /* Home mini card (my posts) */
+  .mini-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    animation: cardIn 0.4s ease both;
+  }
+  .mini-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .mini-card-title { font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+  .mini-card-preview { font-size: 0.85rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+  .mini-card-meta { font-size: 0.78rem; color: var(--text3); display: flex; gap: 10px; }
+  .mini-card-thumb { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+  .mini-card-inner { display: flex; gap: 14px; align-items: center; }
+  .mini-card-body { flex: 1; min-width: 0; }
+
+  /* Home expanded post */
+  .home-expanded-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(26,26,26,0.4); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    animation: fadeIn 0.25s ease;
+    padding: 24px;
+  }
+  .home-expanded-overlay.open { display: flex; }
+  .home-expanded-card {
+    background: var(--white); border-radius: 16px;
+    padding: 28px; max-width: 600px; width: 100%;
+    max-height: 85vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.25s ease;
+  }
+  .expanded-close {
+    position: sticky; top: 0; float: right;
+    background: var(--bg2); border: none; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: var(--text2); transition: background 0.2s;
+  }
+  .expanded-close:hover { background: var(--border); }
+
+  /* ── DELETE BUTTON ── */
+  .action-btn-delete {
+    display: flex; align-items: center; gap: 5px;
+    padding: 7px 12px; border-radius: 20px;
+    font-family: var(--font-body); font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; border: none; background: transparent;
+    color: var(--text3); margin-left: auto;
+    transition: all 0.18s;
+  }
+  .action-btn-delete:hover { background: #fdecea; color: #C0392B; }
+
+  .mini-card-delete {
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border);
+    background: transparent; color: var(--text3);
+    font-family: var(--font-body); transition: all 0.18s;
+    flex-shrink: 0;
+  }
+  .mini-card-delete:hover { background: #fdecea; color: #C0392B; border-color: #C0392B; }
+
+  .modal-btn-danger { background: #C0392B; color: #fff; }
+  .modal-btn-danger:hover { background: #a93226; }
+
+</style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- MODAL: Login Prompt -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <div class="modal-icon">🍽️</div>
+    <h3>加入食享社群</h3>
+    <p>是否有平台帳號？<br>登入後即可按讚與留言！</p>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-primary" onclick="goToLogin()">登入</button>
+      <button class="modal-btn modal-btn-secondary" onclick="goToRegister()">註冊帳號</button>
+      <button class="modal-btn modal-btn-ghost" onclick="closeModal()">繼續瀏覽</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete Confirmation -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-icon">🗑️</div>
+    <h3>刪除貼文</h3>
+    <p>確定要刪除這篇貼文嗎？<br>此操作無法復原。</p>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-danger" id="delete-confirm-btn" onclick="confirmDeletePost()">確定刪除</button>
+      <button class="modal-btn modal-btn-secondary" onclick="closeDeleteModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- HOME EXPANDED POST OVERLAY -->
+<div class="home-expanded-overlay" id="home-expanded-overlay" onclick="closeExpandedPost(event)">
+  <div class="home-expanded-card" id="home-expanded-card"></div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VIEW: AUTH                                 -->
+<!-- ══════════════════════════════════════════ -->
+<div id="view-auth" class="view">
+  <div class="auth-deco auth-deco-1"></div>
+  <div class="auth-deco auth-deco-2"></div>
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">食享<span> FoodShare</span></div>
+      <div class="auth-tagline">用美食連結每個人 · 分享你的餐桌故事</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">登入</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">註冊</button>
+    </div>
+
+    <!-- LOGIN -->
+    <form class="auth-form active" id="form-login" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label">使用者 ID</label>
+        <input type="text" class="form-input" id="login-id" placeholder="輸入你的 ID" autocomplete="username">
+        <span class="form-error" id="login-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">密碼</label>
+        <input type="password" class="form-input" id="login-pw" placeholder="輸入密碼" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-primary">登入</button>
+    </form>
+
+    <!-- REGISTER -->
+    <form class="auth-form" id="form-register" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label class="form-label">使用者 ID</label>
+        <input type="text" class="form-input" id="reg-id" placeholder="設定唯一的 ID" autocomplete="username">
+        <span class="form-error" id="reg-id-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">顯示名稱</label>
+        <input type="text" class="form-input" id="reg-name" placeholder="你想讓大家怎麼稱呼你？">
+        <span class="form-error" id="reg-name-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">密碼</label>
+        <input type="password" class="form-input" id="reg-pw" placeholder="設定密碼（至少 6 位）" autocomplete="new-password">
+        <span class="form-error" id="reg-pw-error"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">頭貼（選填）</label>
+        <label class="avatar-upload-label" for="avatar-input">
+          <div class="avatar-preview" id="avatar-preview-box"><span>🙂</span></div>
+          <div class="avatar-upload-text">
+            <strong>點擊上傳頭貼</strong>
+            支援 JPG、PNG、GIF
+          </div>
+        </label>
+        <input type="file" id="avatar-input" accept="image/*" onchange="handleRegisterAvatar(event)">
+      </div>
+      <button type="submit" class="btn-primary">建立帳號</button>
+    </form>
+
+    <div class="auth-guest-link">
+      <a onclick="showView('feed')">瀏覽分享區 →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VIEW: 2FA VERIFICATION                    -->
+<!-- ══════════════════════════════════════════ -->
+<div id="view-2fa" class="view">
+  <div class="auth-deco auth-deco-1"></div>
+  <div class="auth-deco auth-deco-2"></div>
+  <div class="twofa-card">
+    <div class="twofa-icon">🐾</div>
+    <div class="twofa-title">請選取所有包含狗狗的圖片</div>
+    <div class="twofa-sub">點選所有含有狗狗的照片，再按下「驗證」完成登入</div>
+    <div class="captcha-grid" id="captcha-grid"></div>
+    <div class="twofa-error" id="twofa-error"></div>
+    <div class="captcha-hint">若圖片中沒有狗狗，請勿選取任何圖片</div>
+    <div class="captcha-actions">
+      <button class="captcha-refresh" onclick="refreshCaptcha()">🔄 換一組</button>
+      <button class="btn-primary" onclick="handle2FASubmit()">驗證並登入</button>
+    </div>
+    <button class="twofa-back" onclick="cancel2FA()">← 返回登入</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VIEW: SETTINGS                            -->
+<!-- ══════════════════════════════════════════ -->
+<div id="view-settings" class="view">
+  <nav>
+    <div class="nav-logo" onclick="showView('home')">食享<span> FoodShare</span></div>
+    <div class="nav-right">
+      <div id="settings-nav-avatar-wrap"></div>
+      <span class="nav-name" id="settings-nav-name"></span>
+    </div>
+  </nav>
+  <div class="settings-container">
+    <button class="settings-back" onclick="showView('home')">← 返回首頁</button>
+    <div class="settings-title">帳號設定 ⚙️</div>
+
+    <!-- Profile Card -->
+    <div class="settings-card">
+      <div class="settings-section-label">個人資料</div>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-title" id="settings-display-name"></div>
+          <div class="settings-row-desc" id="settings-display-id"></div>
+        </div>
+        <div class="avatar-upload-wrap" onclick="document.getElementById('settings-avatar-input').click()" title="點擊更換頭貼">
+          <div id="settings-avatar-display"></div>
+          <div class="avatar-upload-overlay">📷</div>
+        </div>
+        <input type="file" id="settings-avatar-input" accept="image/*" style="display:none" onchange="handleSettingsAvatarUpload(event)">
+        <div class="avatar-upload-hint">點擊更換</div>
+      </div>
+      <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:14px;">
+        <div class="form-label" style="margin-bottom:0">個人簡介</div>
+        <textarea class="bio-textarea" id="settings-bio-input" placeholder="介紹一下自己和你的飲食故事…"></textarea>
+        <button class="btn-save-bio" onclick="saveBio()">儲存簡介</button>
+      </div>
+    </div>
+
+    <!-- Security Card -->
+    <div class="settings-card">
+      <div class="settings-section-label">安全性</div>
+      <div class="settings-row">
+        <div class="settings-row-info">
+          <div class="settings-row-title">🔐 雙重認證 (2FA)
+            <span class="two-fa-badge" id="twofa-status-badge">關閉</span>
+          </div>
+          <div class="settings-row-desc">啟用後，每次登入都需要輸入手機驗證碼，提升帳號安全性</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="twofa-toggle" onchange="toggle2FA(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div id="phone-setup-area" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- VIEW: PROFILE                             -->
+<!-- ════════════════════════════════════════════ -->
+<div id="view-profile" class="view">
+  <nav>
+    <div class="nav-logo" onclick="showView('feed')">食享<span> FoodShare</span></div>
+    <div class="nav-right" id="profile-nav-right"></div>
+  </nav>
+  <div class="profile-hero">
+    <div class="profile-avatar-wrap" id="profile-avatar-el"></div>
+    <div class="profile-name" id="profile-name-el"></div>
+    <div class="profile-id" id="profile-id-el"></div>
+    <div class="profile-bio" id="profile-bio-el"></div>
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="profile-stat-posts">0</div>
+        <div class="profile-stat-label">貢給</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="profile-stat-likes">0</div>
+        <div class="profile-stat-label">累計收藏</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-num" id="profile-stat-comments">0</div>
+        <div class="profile-stat-label">累計留言</div>
+      </div>
+    </div>
+  </div>
+  <div class="profile-posts">
+    <div class="profile-section-title">
+      📓 <span id="profile-posts-title"></span>的發布紀錄
+    </div>
+    <div id="profile-posts-list"></div>
+  </div>
+</div>
+
+
+<div id="view-home" class="view">
+  <nav>
+    <div class="nav-logo" onclick="showView('home')">食享<span> FoodShare</span></div>
+    <div class="nav-right">
+      <button class="nav-btn nav-btn-ghost" onclick="showView('feed')">分享區</button>
+      <button class="nav-btn nav-btn-ghost" onclick="showView('settings')">⚙️ 設定</button>
+      <div class="nav-divider"></div>
+      <div id="home-nav-avatar-wrap"></div>
+      <span class="nav-name" id="home-nav-name"></span>
+      <button class="nav-btn nav-btn-ghost" onclick="handleLogout()">登出</button>
+    </div>
+  </nav>
+  <div class="home-hero">
+    <div id="home-hero-avatar-wrap"></div>
+    <h1>歡迎回來，<span id="home-hero-name"></span>！</h1>
+    <p>分享你的餐桌故事，讓更多人看見美食的溫度 🍜</p>
+    <button class="btn-compose" onclick="showView('compose')">＋ 新增貼文</button>
+  </div>
+  <div class="home-posts">
+    <div class="section-title">我的貼文</div>
+    <div id="home-posts-list"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VIEW: COMPOSE                              -->
+<!-- ══════════════════════════════════════════ -->
+<div id="view-compose" class="view">
+  <nav>
+    <div class="nav-logo" onclick="showView('home')">食享<span> FoodShare</span></div>
+    <div class="nav-right">
+      <div id="compose-nav-avatar-wrap"></div>
+      <span class="nav-name" id="compose-nav-name"></span>
+    </div>
+  </nav>
+  <div class="compose-container">
+    <button class="compose-back" onclick="showView('home')">← 返回首頁</button>
+    <div class="compose-card">
+      <div class="compose-author">
+        <div id="compose-author-avatar"></div>
+        <div class="compose-author-info">
+          <strong id="compose-author-name"></strong>
+          <span id="compose-author-id"></span>
+        </div>
+      </div>
+      <div class="compose-form">
+        <input type="text" class="compose-title-input" id="compose-title" placeholder="發布主題…" maxlength="80">
+        <span class="form-error" id="compose-title-error"></span>
+        <textarea class="compose-content-input" id="compose-content" placeholder="分享你的餐桌故事、食譜心得、推薦美食…"></textarea>
+        <span class="form-error" id="compose-content-error"></span>
+
+        <div id="compose-img-preview">
+          <img id="compose-img-preview-img" src="" alt="預覽">
+          <button class="img-remove-btn" onclick="removeComposeImage()">✕</button>
+        </div>
+
+        <label class="img-upload-area" for="compose-img-input" id="compose-img-label">
+          <div class="img-icon">🖼️</div>
+          <p><strong>點擊上傳照片</strong>（選填）</p>
+          <p style="font-size:0.78rem;color:var(--text3);margin-top:4px;">支援 JPG、PNG、GIF</p>
+        </label>
+        <input type="file" id="compose-img-input" accept="image/*" onchange="handleComposeImage(event)">
+
+        <div class="compose-actions">
+          <button class="btn-secondary" onclick="showView('home')">取消</button>
+          <button class="btn-primary" style="padding:12px 28px;" onclick="handlePublish()">發布</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- VIEW: FEED                                 -->
+<!-- ══════════════════════════════════════════ -->
+<div id="view-feed" class="view">
+  <nav>
+    <div class="nav-logo" onclick="currentUser ? showView('home') : showView('auth')">食享<span> FoodShare</span></div>
+    <div class="nav-right" id="feed-nav-right"></div>
+  </nav>
+  <div class="feed-container">
+    <div class="feed-header">
+      <div class="feed-title">分享區 🍽️</div>
+      <div class="feed-subtitle">探索所有人的餐桌故事</div>
+    </div>
+    <div id="feed-posts-list"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════
+let users = JSON.parse(localStorage.getItem('fsp_users') || '[]');
+let posts = JSON.parse(localStorage.getItem('fsp_posts') || '[]');
+let sessionId = localStorage.getItem('fsp_session') || null;
+let currentUser = sessionId ? users.find(u => u.id === sessionId) : null;
+let pendingAvatar = null;
+let pendingImage = null;
+
+function saveUsers() { localStorage.setItem('fsp_users', JSON.stringify(users)); }
+function savePosts() { localStorage.setItem('fsp_posts', JSON.stringify(posts)); }
+function saveSession() { localStorage.setItem('fsp_session', sessionId || ''); }
+
+// ═══════════════════════════════════════
+//  VIEWS
+// ═══════════════════════════════════════
+function showView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('view-' + viewId);
+  if (target) { target.classList.add('active'); }
+
+  if (viewId === 'home') renderHome();
+  if (viewId === 'compose') renderCompose();
+  if (viewId === 'feed') renderFeed();
+  if (viewId === 'auth') { switchAuthTab('login'); }
+  if (viewId === 'settings') renderSettings();
+  if (viewId === 'profile') { /* rendered by showProfile() */ }
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════
+function switchAuthTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').classList.toggle('active', tab === 'login');
+  document.getElementById('form-register').classList.toggle('active', tab === 'register');
+}
+
+function handleRegisterAvatar(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingAvatar = ev.target.result;
+    const box = document.getElementById('avatar-preview-box');
+    box.innerHTML = `<img src="${pendingAvatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleRegister(e) {
+  e.preventDefault();
+  const id = document.getElementById('reg-id').value.trim();
+  const name = document.getElementById('reg-name').value.trim();
+  const pw = document.getElementById('reg-pw').value;
+
+  let valid = true;
+  const showErr = (elId, msg) => { const el = document.getElementById(elId); el.textContent = msg; el.classList.toggle('show', !!msg); };
+
+  showErr('reg-id-error', ''); showErr('reg-name-error', ''); showErr('reg-pw-error', '');
+
+  if (!id) { showErr('reg-id-error', 'ID 不能為空'); valid = false; }
+  else if (users.find(u => u.id === id)) { showErr('reg-id-error', '此 ID 已被使用'); valid = false; }
+  if (!name) { showErr('reg-name-error', '顯示名稱不能為空'); valid = false; }
+  if (pw.length < 6) { showErr('reg-pw-error', '密碼至少需要 6 位'); valid = false; }
+  if (!valid) return;
+
+  users.push({ id, name, password: pw, avatar: pendingAvatar });
+  saveUsers();
+  pendingAvatar = null;
+  document.getElementById('avatar-preview-box').innerHTML = '<span>🙂</span>';
+  document.getElementById('form-register').reset();
+  showToast('✅ 註冊成功！請重新登入', 'success');
+  setTimeout(() => switchAuthTab('login'), 300);
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+
+  const user = users.find(u => u.id === id && u.password === pw);
+  if (!user) {
+    errEl.textContent = 'ID 或密碼錯誤，請再試一次';
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+  document.getElementById('form-login').reset();
+
+  // Check if 2FA is enabled
+  if (user.twoFA && user.twoFA.enabled) {
+    startCaptchaFlow(user);
+  } else {
+    completeLogin(user);
+  }
+}
+
+function completeLogin(user) {
+  sessionId = user.id;
+  currentUser = user;
+  saveSession();
+  showToast(`🍜 歡迎回來，${user.name}！`, 'success');
+  showView('home');
+}
+
+function handleLogout() {
+  sessionId = null;
+  currentUser = null;
+  captchaState.pendingUserId = null;
+  saveSession();
+  showView('auth');
+}
+
+// ═══════════════════════════════════════
+//  2FA IMAGE CAPTCHA LOGIC
+// ═══════════════════════════════════════
+const captchaState = {
+  pendingUserId: null,
+  tiles: [],        // { src, isDog }
+  selected: new Set()
+};
+
+// Full image pool
+const DOG_IMAGES = [
+  'images/dog_golden.png',
+  'images/dog_frenchie.png',
+  'images/dog_beagle.png',
+  'images/dog_samoyed.png',
+  'images/dog_shiba.png'
+];
+const OTHER_IMAGES = [
+  'images/cat_orange.png',
+  'images/cat_blackwhite.png',
+  'images/animal_panda.png',
+  'images/animal_rabbit.png',
+  'images/animal_hamster.png',
+  'images/animal_cat_sunglasses.png'
+];
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startCaptchaFlow(user) {
+  captchaState.pendingUserId = user.id;
+  captchaState.selected = new Set();
+
+  // Pick 3-4 dogs + fill rest with non-dogs to get 9 total
+  const dogCount = Math.floor(Math.random() * 2) + 3; // 3 or 4
+  const dogs = shuffleArray(DOG_IMAGES).slice(0, dogCount).map(src => ({ src, isDog: true }));
+  const others = shuffleArray(OTHER_IMAGES).slice(0, 9 - dogCount).map(src => ({ src, isDog: false }));
+  captchaState.tiles = shuffleArray([...dogs, ...others]);
+
+  // Show 2FA view
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-2fa').classList.add('active');
+  window.scrollTo(0, 0);
+
+  renderCaptchaGrid();
+  document.getElementById('twofa-error').classList.remove('show');
+  document.getElementById('twofa-error').textContent = '';
+}
+
+function renderCaptchaGrid() {
+  const grid = document.getElementById('captcha-grid');
+  grid.innerHTML = captchaState.tiles.map((tile, i) => `
+    <div class="captcha-tile ${captchaState.selected.has(i) ? 'selected' : ''}"
+         id="ctile-${i}" onclick="toggleCaptchaTile(${i})">
+      <img src="${tile.src}" alt="動物圖片" loading="lazy">
+      <div class="captcha-check">✓</div>
+    </div>
+  `).join('');
+}
+
+function toggleCaptchaTile(index) {
+  const tile = document.getElementById('ctile-' + index);
+  if (captchaState.selected.has(index)) {
+    captchaState.selected.delete(index);
+    tile.classList.remove('selected');
+  } else {
+    captchaState.selected.add(index);
+    tile.classList.add('selected');
+  }
+  // Clear error on interaction
+  document.getElementById('twofa-error').classList.remove('show');
+}
+
+function refreshCaptcha() {
+  const user = users.find(u => u.id === captchaState.pendingUserId);
+  if (user) startCaptchaFlow(user);
+}
+
+function handle2FASubmit() {
+  const errEl = document.getElementById('twofa-error');
+  const dogIndices = captchaState.tiles
+    .map((t, i) => t.isDog ? i : -1)
+    .filter(i => i !== -1);
+
+  const selected = captchaState.selected;
+
+  // Check: every selected tile must be a dog, and every dog must be selected
+  const allDogsSelected = dogIndices.every(i => selected.has(i));
+  const noWrongSelected = [...selected].every(i => captchaState.tiles[i].isDog);
+
+  if (!allDogsSelected || !noWrongSelected) {
+    errEl.textContent = '❌ 選取有誤，請重新確認所有狗狗的圖片';
+    errEl.classList.add('show');
+    // Shake the grid
+    const grid = document.getElementById('captcha-grid');
+    grid.classList.remove('shake');
+    void grid.offsetWidth; // force reflow
+    grid.classList.add('shake');
+    setTimeout(() => grid.classList.remove('shake'), 500);
+    return;
+  }
+
+  // Correct!
+  const user = users.find(u => u.id === captchaState.pendingUserId);
+  captchaState.pendingUserId = null;
+  captchaState.selected = new Set();
+  completeLogin(user);
+}
+
+function cancel2FA() {
+  captchaState.pendingUserId = null;
+  captchaState.selected = new Set();
+  showView('auth');
+}
+
+
+
+
+// ═══════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════
+function renderSettings() {
+  if (!currentUser) { showView('auth'); return; }
+
+  renderAvatarEl('settings-nav-avatar-wrap', currentUser.avatar, currentUser.name, 36, true);
+  document.getElementById('settings-nav-name').textContent = currentUser.name;
+  document.getElementById('settings-display-name').textContent = currentUser.name;
+  document.getElementById('settings-display-id').textContent = '@' + currentUser.id;
+
+  // Render clickable avatar
+  const displayEl = document.getElementById('settings-avatar-display');
+  if (displayEl) {
+    if (currentUser.avatar) {
+      displayEl.innerHTML = `<img src="${currentUser.avatar}" alt="${escHtml(currentUser.name)}">` ;
+    } else {
+      displayEl.innerHTML = `<div class="avatar-upload-placeholder">${getInitialEmoji(currentUser.name)}</div>`;
+    }
+  }
+
+  // Bio
+  const bioInput = document.getElementById('settings-bio-input');
+  if (bioInput) bioInput.value = currentUser.bio || '';
+
+  const has2FA = currentUser.twoFA && currentUser.twoFA.enabled;
+  const toggle = document.getElementById('twofa-toggle');
+  const badge = document.getElementById('twofa-status-badge');
+
+  toggle.checked = !!has2FA;
+  badge.textContent = has2FA ? '已開啟' : '關閉';
+  badge.className = 'two-fa-badge ' + (has2FA ? 'on' : 'off');
+}
+
+function saveBio() {
+  const bio = document.getElementById('settings-bio-input').value.trim();
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx !== -1) {
+    users[idx].bio = bio;
+    currentUser = users[idx];
+    saveUsers();
+  }
+  showToast('✅ 個人簡介已儲存', 'success');
+}
+
+function handleSettingsAvatarUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { showToast('請選擇圖片檔案', 'error'); return; }
+  if (file.size > 3 * 1024 * 1024) { showToast('圖片大小請勿超過 3MB', 'error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataURL = ev.target.result;
+
+    // Save avatar to user only — buildPostCardHTML reads live from users array
+    const idx = users.findIndex(u => u.id === currentUser.id);
+    if (idx !== -1) {
+      users[idx].avatar = dataURL;
+      currentUser = users[idx];
+      saveUsers();
+    }
+
+    // Refresh settings avatar display
+    const displayEl = document.getElementById('settings-avatar-display');
+    if (displayEl) displayEl.innerHTML = `<img src="${dataURL}" alt="${escHtml(currentUser.name)}">`;
+
+    renderAvatarEl('settings-nav-avatar-wrap', dataURL, currentUser.name, 36, true);
+    showToast('✅ 頭貼已更新！', 'success');
+    e.target.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+
+
+// ═══════════════════════════════════════
+//  PROFILE
+// ═══════════════════════════════════════
+let _profileFrom = 'feed'; // which view to return to
+
+function showProfile(userId) {
+  // Remember where we came from
+  const active = document.querySelector('.view.active');
+  if (active) _profileFrom = active.id.replace('view-', '');
+
+  const user = users.find(u => u.id === userId);
+  if (!user) { showToast('找不到此用戶', 'error'); return; }
+
+  const isOwn = currentUser && currentUser.id === userId;
+
+  // Nav right
+  const navRight = document.getElementById('profile-nav-right');
+  if (currentUser) {
+    navRight.innerHTML = `
+      <button class="nav-btn nav-btn-ghost" onclick="showView(_profileFrom)">← 返回</button>
+      <div class="nav-divider"></div>
+      <span class="nav-name">${escHtml(currentUser.name)}</span>
+      <button class="nav-btn nav-btn-ghost" onclick="handleLogout()">登出</button>
+    `;
+  } else {
+    navRight.innerHTML = `
+      <button class="nav-btn nav-btn-ghost" onclick="showView('feed')">← 返回</button>
+      <button class="nav-btn nav-btn-ghost" onclick="goToLogin()">登入</button>
+    `;
+  }
+
+  // Avatar
+  const avatarEl = document.getElementById('profile-avatar-el');
+  if (user.avatar) {
+    avatarEl.innerHTML = `<img src="${user.avatar}" alt="${escHtml(user.name)}">`;
+  } else {
+    avatarEl.textContent = getInitialEmoji(user.name);
+  }
+
+  document.getElementById('profile-name-el').textContent = user.name + ' 的主頁';
+  document.getElementById('profile-id-el').textContent = '@' + user.id;
+
+  // Bio — if own profile, show editable textarea; else show read-only
+  const bioEl = document.getElementById('profile-bio-el');
+  if (isOwn) {
+    bioEl.innerHTML = `
+      <div style="font-size:0.8rem;color:var(--text3);margin-bottom:6px;text-align:left;">✏️ 個人簡介（只有你看得到此編輯框）</div>
+      <textarea class="bio-textarea" id="profile-bio-input" placeholder="介紹一下自己和你的飲食故事…">${escHtml(user.bio || '')}</textarea>
+      <button class="btn-save-bio" onclick="saveProfileBio()">儲存簡介</button>
+    `;
+    bioEl.style.textAlign = 'left';
+  } else if (user.bio) {
+    bioEl.textContent = user.bio;
+    bioEl.classList.remove('profile-bio-empty');
+    bioEl.style.textAlign = '';
+  } else {
+    bioEl.textContent = '這個人還沒有填寫個人簡介…';
+    bioEl.classList.add('profile-bio-empty');
+    bioEl.style.textAlign = '';
+  }
+
+  // Stats
+  const userPosts = posts.filter(p => p.authorId === userId);
+  const totalLikes = userPosts.reduce((sum, p) => sum + p.likes.length, 0);
+  const totalComments = userPosts.reduce((sum, p) => sum + p.comments.length, 0);
+  document.getElementById('profile-stat-posts').textContent = userPosts.length;
+  document.getElementById('profile-stat-likes').textContent = totalLikes;
+  document.getElementById('profile-stat-comments').textContent = totalComments;
+  document.getElementById('profile-posts-title').textContent = user.name;
+
+  // Posts list
+  const list = document.getElementById('profile-posts-list');
+  if (userPosts.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🍽️</div><p>${escHtml(user.name)} 還沒有發布任何貼文</p></div>`;
+  } else {
+    const sorted = [...userPosts].sort((a, b) => b.timestamp - a.timestamp);
+    list.innerHTML = sorted.map((p, i) =>
+      `<div style="animation-delay:${i*80}ms">${buildPostCardHTML(p, false)}</div>`
+    ).join('');
+  }
+
+  // Switch to profile view
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-profile').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function saveProfileBio() {
+  const bio = document.getElementById('profile-bio-input').value.trim();
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx !== -1) {
+    users[idx].bio = bio;
+    currentUser = users[idx];
+    saveUsers();
+  }
+  showToast('✅ 個人簡介已儲存', 'success');
+  // Re-render bio area as saved text
+  const bioEl = document.getElementById('profile-bio-el');
+  if (bio) {
+    bioEl.innerHTML = `
+      <div style="font-size:0.8rem;color:var(--text3);margin-bottom:6px;text-align:left;">✏️ 個人簡介（只有你看得到此編輯框）</div>
+      <textarea class="bio-textarea" id="profile-bio-input" placeholder="介紹一下自己和你的飲食故事…">${escHtml(bio)}</textarea>
+      <button class="btn-save-bio" onclick="saveProfileBio()">儲存簡介</button>
+    `;
+  }
+}
+
+function toggle2FA(checked) {
+  const badge = document.getElementById('twofa-status-badge');
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx !== -1) {
+    users[idx].twoFA = { enabled: checked };
+    currentUser = users[idx];
+    saveUsers();
+  }
+  badge.textContent = checked ? '已開啟' : '關閉';
+  badge.className = 'two-fa-badge ' + (checked ? 'on' : 'off');
+  showToast(checked ? '🔐 雙重認證已啟用！' : '🔓 雙重認證已關閉', checked ? 'success' : '');
+}
+
+
+
+// ═══════════════════════════════════════
+//  HOME
+// ═══════════════════════════════════════
+function renderHome() {
+  if (!currentUser) { showView('auth'); return; }
+
+  // Nav & hero avatar
+  renderAvatarEl('home-nav-avatar-wrap', currentUser.avatar, currentUser.name, 36, true);
+  document.getElementById('home-nav-name').textContent = currentUser.name;
+  renderAvatarEl('home-hero-avatar-wrap', currentUser.avatar, currentUser.name, 80, false, 'home-hero-avatar');
+  document.getElementById('home-hero-name').textContent = currentUser.name;
+
+  const myPosts = posts.filter(p => p.authorId === currentUser.id).sort((a,b) => b.timestamp - a.timestamp);
+  const list = document.getElementById('home-posts-list');
+
+  if (myPosts.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🍽️</div><p>還沒有貼文<br>分享你的第一道美食故事吧！</p></div>`;
+    return;
+  }
+  list.innerHTML = myPosts.map((p, i) => `
+    <div class="mini-card" style="animation-delay:${i*80}ms" onclick="openExpandedPost('${p.id}')">
+      <div class="mini-card-inner">
+        <div class="mini-card-body">
+          <div class="mini-card-title">${escHtml(p.title)}</div>
+          <div class="mini-card-preview">${escHtml(p.content)}</div>
+          <div class="mini-card-meta">
+            <span>❤️ ${p.likes.length}</span>
+            <span>💬 ${p.comments.length}</span>
+            <span>${formatTime(p.timestamp)}</span>
+          </div>
+        </div>
+        ${p.image ? `<img class="mini-card-thumb" src="${p.image}" alt="縮圖">` : ''}
+        <button class="mini-card-delete" onclick="event.stopPropagation();handleDeletePost('${p.id}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openExpandedPost(postId) {
+  const p = posts.find(x => x.id === postId);
+  if (!p) return;
+  const card = document.getElementById('home-expanded-card');
+  card.innerHTML = `
+    <button class="expanded-close" onclick="closeExpandedPost()">✕</button>
+    ${buildPostCardHTML(p, true)}
+  `;
+  document.getElementById('home-expanded-overlay').classList.add('open');
+}
+
+function closeExpandedPost(e) {
+  if (!e || e.target === document.getElementById('home-expanded-overlay')) {
+    document.getElementById('home-expanded-overlay').classList.remove('open');
+  }
+}
+
+// ═══════════════════════════════════════
+//  COMPOSE
+// ═══════════════════════════════════════
+function renderCompose() {
+  if (!currentUser) { showView('auth'); return; }
+  pendingImage = null;
+  document.getElementById('compose-img-preview').style.display = 'none';
+  document.getElementById('compose-img-label').style.display = '';
+  document.getElementById('compose-title').value = '';
+  document.getElementById('compose-content').value = '';
+  document.getElementById('compose-title-error').classList.remove('show');
+  document.getElementById('compose-content-error').classList.remove('show');
+
+  renderAvatarEl('compose-nav-avatar-wrap', currentUser.avatar, currentUser.name, 36, true);
+  document.getElementById('compose-nav-name').textContent = currentUser.name;
+
+  const avatarEl = document.getElementById('compose-author-avatar');
+  if (currentUser.avatar) {
+    avatarEl.innerHTML = `<img class="compose-avatar" src="${currentUser.avatar}" alt="${escHtml(currentUser.name)}">`;
+  } else {
+    avatarEl.innerHTML = `<div class="compose-avatar-placeholder">${getInitialEmoji(currentUser.name)}</div>`;
+  }
+  document.getElementById('compose-author-name').textContent = currentUser.name;
+  document.getElementById('compose-author-id').textContent = '@' + currentUser.id;
+}
+
+function handleComposeImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingImage = ev.target.result;
+    document.getElementById('compose-img-preview-img').src = pendingImage;
+    document.getElementById('compose-img-preview').style.display = 'block';
+    document.getElementById('compose-img-label').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeComposeImage() {
+  pendingImage = null;
+  document.getElementById('compose-img-preview').style.display = 'none';
+  document.getElementById('compose-img-label').style.display = '';
+  document.getElementById('compose-img-input').value = '';
+}
+
+function handlePublish() {
+  const title = document.getElementById('compose-title').value.trim();
+  const content = document.getElementById('compose-content').value.trim();
+  let valid = true;
+
+  const tErr = document.getElementById('compose-title-error');
+  const cErr = document.getElementById('compose-content-error');
+  tErr.classList.remove('show'); cErr.classList.remove('show');
+
+  if (!title) { tErr.textContent = '請填寫發布主題'; tErr.classList.add('show'); valid = false; }
+  if (!content) { cErr.textContent = '請填寫發布內容'; cErr.classList.add('show'); valid = false; }
+  if (!valid) return;
+
+  const post = {
+    id: 'post_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+    authorId: currentUser.id,
+    authorName: currentUser.name,
+    authorAvatar: currentUser.avatar,
+    title, content,
+    image: pendingImage || null,
+    timestamp: Date.now(),
+    likes: [],
+    comments: []
+  };
+  posts.unshift(post);
+  savePosts();
+  showToast('🎉 貼文發布成功！', 'success');
+  pendingImage = null;
+  setTimeout(() => showView('feed'), 300);
+}
+
+// ═══════════════════════════════════════
+//  FEED
+// ═══════════════════════════════════════
+function renderFeed() {
+  // Refresh currentUser from localStorage in case of updates
+  if (sessionId) currentUser = users.find(u => u.id === sessionId) || null;
+
+  // Nav
+  const navRight = document.getElementById('feed-nav-right');
+  if (currentUser) {
+    navRight.innerHTML = '';
+    renderAvatarEl('feed-nav-avatar-wrap', currentUser.avatar, currentUser.name, 36, true);
+    const wrap = document.createElement('div');
+    wrap.id = 'feed-nav-avatar-wrap';
+    navRight.innerHTML = `
+      <button class="nav-btn nav-btn-ghost" onclick="showView('home')">首頁</button>
+      <div class="nav-divider"></div>
+      <span id="feed-nav-name" class="nav-name">${escHtml(currentUser.name)}</span>
+      <button class="nav-btn nav-btn-ghost" onclick="handleLogout()">登出</button>
+    `;
+    const avatarWrap = document.createElement('div');
+    avatarWrap.style.display = 'flex'; avatarWrap.style.alignItems = 'center';
+    if (currentUser.avatar) {
+      avatarWrap.innerHTML = `<img class="nav-avatar" src="${currentUser.avatar}" alt="">`;
+    } else {
+      avatarWrap.innerHTML = `<div style="width:36px;height:36px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:1rem;">${getInitialEmoji(currentUser.name)}</div>`;
+    }
+    navRight.insertBefore(avatarWrap, navRight.firstChild);
+  } else {
+    navRight.innerHTML = `
+      <button class="nav-btn nav-btn-ghost" onclick="goToLogin()">登入</button>
+      <button class="nav-btn nav-btn-accent" onclick="goToRegister()">註冊</button>
+    `;
+  }
+
+  const list = document.getElementById('feed-posts-list');
+  if (posts.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🍽️</div><p>還沒有任何貼文<br>成為第一個分享的人吧！</p></div>`;
+    return;
+  }
+  const sorted = [...posts].sort((a,b) => b.timestamp - a.timestamp);
+  list.innerHTML = sorted.map((p, i) => `<div style="animation-delay:${i*80}ms">${buildPostCardHTML(p, false)}</div>`).join('');
+}
+
+function buildPostCardHTML(p, inExpanded) {
+  // Always use the user's latest avatar from the users array
+  const postAuthor = users.find(u => u.id === p.authorId);
+  const liveAvatar = (postAuthor && postAuthor.avatar) || p.authorAvatar;
+  const avatarHTML = liveAvatar
+    ? `<img class="post-avatar" src="${liveAvatar}" alt="${escHtml(p.authorName)}">`
+    : `<div class="post-avatar-placeholder">${getInitialEmoji(p.authorName)}</div>`;
+
+  const liked = currentUser && p.likes.includes(currentUser.id);
+  const commentsHTML = buildCommentsHTML(p);
+
+  return `
+    <div class="post-card" id="card-${p.id}">
+      <div class="post-header">
+        <div class="post-author-link" onclick="event.stopPropagation();showProfile('${p.authorId}')">
+          ${avatarHTML}
+          <div class="post-meta">
+            <div class="post-author-name">${escHtml(p.authorName)}</div>
+            <div class="post-author-id">@${escHtml(p.authorId)}</div>
+          </div>
+        </div>
+        <div class="post-time">${formatTime(p.timestamp)}</div>
+      </div>
+      <div class="post-title">${escHtml(p.title)}</div>
+      <div class="post-content">${escHtml(p.content)}</div>
+      ${p.image ? `<img class="post-image" src="${p.image}" alt="貼文圖片" loading="lazy">` : ''}
+      <div class="post-actions">
+        <button class="action-btn ${liked ? 'liked' : ''}" onclick="handleLike('${p.id}')">
+          <span class="like-icon">👍</span>
+          <span id="like-count-${p.id}">${p.likes.length}</span>
+        </button>
+        <button class="action-btn" onclick="toggleComments('${p.id}')">
+          💬 <span id="comment-count-${p.id}">${p.comments.length}</span>
+        </button>
+        ${currentUser && currentUser.id === p.authorId ? `
+        <button class="action-btn-delete" onclick="event.stopPropagation();handleDeletePost('${p.id}')">🗑️ 刪除</button>
+        ` : ''}
+      </div>
+      <div class="comments-section" id="comments-${p.id}">
+        <div id="comments-list-${p.id}">${commentsHTML}</div>
+        ${buildCommentInput(p.id)}
+      </div>
+    </div>
+  `;
+}
+
+function buildCommentsHTML(p) {
+  if (p.comments.length === 0) return '<div style="font-size:0.82rem;color:var(--text3);margin-bottom:10px;">還沒有留言，來第一個留言吧！</div>';
+  return p.comments.map(c => {
+    // Always use latest avatar from users array
+    const commentAuthor = users.find(u => u.id === c.authorId);
+    const liveAvatar = (commentAuthor && commentAuthor.avatar) || c.authorAvatar;
+    const avatarHTML = liveAvatar
+      ? `<img class="comment-avatar" src="${liveAvatar}" alt="">`
+      : `<div class="comment-avatar-placeholder">${getInitialEmoji(c.authorName)}</div>`;
+    return `
+      <div class="comment-item">
+        ${avatarHTML}
+        <div class="comment-bubble">
+          <div class="comment-name">${escHtml(c.authorName)}</div>
+          <div class="comment-text">${escHtml(c.text)}</div>
+          <div class="comment-time">${formatTime(c.timestamp)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function buildCommentInput(postId) {
+  if (currentUser) {
+    return `
+      <div class="comment-input-row">
+        <textarea class="comment-input" id="comment-input-${postId}" placeholder="留下你的想法…" rows="1"
+          oninput="autoResize(this)"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment('${postId}');}"></textarea>
+        <button class="comment-submit" onclick="submitComment('${postId}')">送出</button>
+      </div>
+    `;
+  } else {
+    return `
+      <div class="guest-comment-hint">
+        <input class="comment-input" placeholder="請登入後留言" disabled style="width:100%;cursor:not-allowed;" onclick="openLoginModal()">
+        <span style="margin-top:6px;display:block;"><a onclick="openLoginModal()">登入</a> 或 <a onclick="goToRegister()">註冊</a> 後即可留言</span>
+      </div>
+    `;
+  }
+}
+
+function toggleComments(postId) {
+  const el = document.getElementById('comments-' + postId);
+  el.classList.toggle('open');
+}
+
+function handleLike(postId) {
+  if (!currentUser) { openLoginModal(); return; }
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+  const idx = post.likes.indexOf(currentUser.id);
+  if (idx === -1) post.likes.push(currentUser.id);
+  else post.likes.splice(idx, 1);
+  savePosts();
+
+  // Update button in all cards (could be in home expanded or feed)
+  const liked = post.likes.includes(currentUser.id);
+  document.querySelectorAll(`[onclick="handleLike('${postId}')"]`).forEach(btn => {
+    btn.classList.toggle('liked', liked);
+  });
+  document.querySelectorAll(`#like-count-${postId}`).forEach(el => { el.textContent = post.likes.length; });
+}
+
+function submitComment(postId) {
+  if (!currentUser) { openLoginModal(); return; }
+  const input = document.getElementById('comment-input-' + postId);
+  const text = input.value.trim();
+  if (!text) return;
+
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const comment = {
+    id: 'c_' + Date.now(),
+    authorId: currentUser.id,
+    authorName: currentUser.name,
+    authorAvatar: currentUser.avatar,
+    text,
+    timestamp: Date.now()
+  };
+  post.comments.push(comment);
+  savePosts();
+  input.value = '';
+  input.style.height = '';
+
+  // Re-render comments list
+  document.querySelectorAll(`#comments-list-${postId}`).forEach(el => { el.innerHTML = buildCommentsHTML(post); });
+  document.querySelectorAll(`#comment-count-${postId}`).forEach(el => { el.textContent = post.comments.length; });
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ═══════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════
+function openLoginModal() { document.getElementById('login-modal').classList.add('open'); }
+function closeModal() { document.getElementById('login-modal').classList.remove('open'); }
+function goToLogin() { closeModal(); showView('auth'); switchAuthTab('login'); }
+function goToRegister() { closeModal(); showView('auth'); switchAuthTab('register'); }
+
+let _pendingDeleteId = null;
+function handleDeletePost(postId) {
+  _pendingDeleteId = postId;
+  document.getElementById('delete-modal').classList.add('open');
+}
+function closeDeleteModal() {
+  _pendingDeleteId = null;
+  document.getElementById('delete-modal').classList.remove('open');
+}
+function confirmDeletePost() {
+  if (!_pendingDeleteId) return;
+  const idx = posts.findIndex(p => p.id === _pendingDeleteId);
+  if (idx !== -1) posts.splice(idx, 1);
+  savePosts();
+  closeDeleteModal();
+  closeExpandedPost();
+  showToast('🗑️ 貼文已刪除', '');
+  // Re-render whichever view is active
+  const activeView = document.querySelector('.view.active');
+  if (activeView && activeView.id === 'view-home') renderHome();
+  else if (activeView && activeView.id === 'view-feed') renderFeed();
+}
+
+// ═══════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function formatTime(ts) {
+  const now = Date.now();
+  const diff = now - ts;
+  if (diff < 60000) return '剛剛';
+  if (diff < 3600000) return Math.floor(diff/60000) + ' 分鐘前';
+  if (diff < 86400000) return Math.floor(diff/3600000) + ' 小時前';
+  if (diff < 2592000000) return Math.floor(diff/86400000) + ' 天前';
+  const d = new Date(ts);
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function getInitialEmoji(name) {
+  if (!name) return '🙂';
+  const emojis = ['🍜','🍣','🍕','🍔','🍰','🥗','🍱','🍛','🥘','🫕'];
+  const code = name.charCodeAt(0) || 0;
+  return emojis[code % emojis.length];
+}
+
+function renderAvatarEl(containerId, avatar, name, size, isNav, extraClass) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (avatar) {
+    el.innerHTML = `<img class="${extraClass || (isNav ? 'nav-avatar' : '')}" src="${avatar}" alt="${escHtml(name)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;">`;
+  } else {
+    el.innerHTML = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:${size*0.4}px;">${getInitialEmoji(name)}</div>`;
+  }
+}
+
+function showToast(msg, type='', duration=2700) {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  // Adjust animation timing to match duration
+  const animDuration = Math.max(duration - 500, 500);
+  el.style.animation = `toastIn 0.3s ease, toastOut 0.3s ease ${animDuration}ms both`;
+  container.appendChild(el);
+  setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, duration + 400);
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+(function init() {
+  if (currentUser) showView('home');
+  else showView('auth');
+})();
+</script>
+</body>
+</html>
